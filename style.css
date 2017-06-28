@@ -1,0 +1,94 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+body{
+    background: black;
+    padding: 15px;
+}
+.brick{
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid blue;
+    border-radius: 8px;
+    margin: -2px;
+}
+.gate{
+    width: 24px;
+    height: 12px;
+    margin-top:4px;
+    border: none;
+    border-top: 4px solid white;
+    border-radius: 0px;
+}
+.empty{
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin: -2px;
+}
+.coin{
+    background-color: white;
+    border-radius: 50%;
+}
+.big{
+    width: 14px;
+    height: 14px;
+    margin-left:3px;
+    margin-top:3px;
+}
+.small{
+    margin-left: 11px;
+    margin-top: 11px;
+    width: 3px;
+    height: 3px;
+
+}
+.pacman{
+    background: url('pacman.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    transform: rotate(180deg);
+}
+.orange_ghost{
+    background: url('orange_ghost.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.blue_ghost{
+    background: url('blue_ghost.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.red_ghost{
+    background: url('red_ghost.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+.pink_ghost{
+    background: url('pink_ghost.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+h1 {
+    color: red;
+    position: absolute;
+    top: 350px;
+    left: 135px;
+}
+.score_box {
+    color: white;
+    position: absolute;
+    right: 500px;
+    top: 150px;
+}
+h4 {
+    margin-top: 40px;
+}
