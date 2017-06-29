@@ -27,6 +27,34 @@ $(document).ready(function(){
     return ([distInX, distInY]);
   }
 
+  function spaceIsClear(x, y, isGhost){
+    if(level[y][x] == 0){
+      return true;
+    }
+    else if(level[y][x] == 1){
+      return true;
+    }
+    else if(level[y][x] == 3){
+      return true;
+    }
+    if(isGhost){
+      if(level[y][x] == 'g_b'){
+        return true;
+      }
+      else if(level[y][x] == 'g_r'){
+        return true;
+      }
+      else if(level[y][x] == 'g_o'){
+        return true;
+      }
+      else if(level[y][x] == 'g_p'){
+        return true;
+      }
+
+    }
+    return false;
+  }
+
   function createLevel(){
     var quadrant1 = [
       [2,2,2,2,2,2,2,2,2,2,2,2,2],
@@ -75,37 +103,120 @@ $(document).ready(function(){
   function placeGhosts(level){
     var color = ['blue', 'orange', 'pink', 'red'];
 
-    var blue_ghost = {
-      x:        11,
-      y:        11,
-      inBox:  true,
-      symbol: 'g_b'
-    }
-    var red_ghost = {
-      x:        12,
-      y:        11,
-      inBox:  true,
-      symbol: 'g_r'
-    }
-    var orange_ghost = {
-      x:        13,
-      y:        11,
-      inBox:  true,
-      symbol: 'g_o'
-    }
-    var pink_ghost = {
-      x:        14,
-      y:        11,
-      inBox:  true,
-      symbol: 'g_p'
+    function ghost(name, x, y, state, symbol) {
+      this.name = name
+      this.x = x;
+      this.y = y;
+      this.state = state;
+      this.symbol = symbol;
+      this.tileOccupied = '';
+    
     }
 
-    ghosts = [blue_ghost, red_ghost, orange_ghost, pink_ghost];
+    var blue_ghost =   new ghost('blue', 12, 11, 'in box', 'g_b');
+    var red_ghost =    new ghost('red', 11, 11, 'in box', 'g_r');
+    var orange_ghost = new ghost('orange', 14, 11, 'in box', 'g_o');
+    var pink_ghost =   new ghost('pink', 13, 11, 'in box', 'g_p');
+
+    ghosts = [red_ghost, blue_ghost, pink_ghost, orange_ghost];
 
     for(i=0; i<ghosts.length; i++){
-      level[ghosts[i]['y']][ghosts[i]['x']] = ghosts[i]['symbol'];
+      level[ghosts[i].y][ghosts[i].x] = ghosts[i].symbol;
     }
   }
+
+  function moveGhost(ghost){
+    var old_x = ghost.x;
+    var old_y = ghost.y;
+
+    level[ghost.y][ghost.x] = 0;
+    ghost.hasMoved = false;
+
+    if(turns >= 20){
+      ghost.state = 'chase';
+    }
+
+    if(ghost.state == 'in box'){
+      if(level[9][12] == 0){
+        ghost.x = 12;
+        ghost.y = 9;
+        ghost.state = 'scatter'
+        ghost.tileOccupied = 0;
+      }
+    }
+
+    else{
+      if(ghost.state == 'scatter'){
+        var hasMoved = false;
+        while(!hasMoved){
+          var dir = Math.round(Math.random());
+          var x = 0;
+          var y = 0;
+          if(dir == 1){
+            dir = Math.round(Math.random());
+            if(dir == 1){
+              x = 1;
+            }
+            else{
+              x = -1;
+            }
+          }
+          else{
+           dir = Math.round(Math.random());
+            if(dir == 1){
+              y = 1;
+            }
+            else{
+              y = -1;
+            }
+          }
+        
+          if(spaceIsClear(ghost.x + x, ghost.y + y)){
+            ghost.x += x;
+            ghost.y += y;
+
+            if(ghost.x == 0 && ghost.y == 9){
+              ghost.x = 24;
+            }
+            if(ghost.x == 24 && ghost.y == 9){
+              ghost.x = 1;
+            }
+
+            hasMoved = true;
+          }
+        }
+      }
+      else if(ghost.state == 'chase'){
+
+        var vector = getVectorTo(ghost.x, ghost.y, PacMan.x, PacMan.y);
+
+        if(spaceIsClear(ghost.x+vector[0], ghost.y, true)){
+          ghost.x += vector[0];
+        }
+        else if(spaceIsClear(ghost.x, ghost.y+vector[1], true)){
+          ghost.y += vector[1];
+        }
+        else if(spaceIsClear(ghost.x-vector[0], ghost.y, true)){
+          ghost.x -= vector[0];
+        }
+        else if(spaceIsClear(ghost.x, ghost.y-vector[1], true)){
+          ghost.y -= vector[1];
+        }
+      }
+
+    }
+    level[old_y][old_x] = ghost.tileOccupied
+    if(spaceIsClear(ghost.x, ghost.y)){
+      ghost.tileOccupied = level[ghost.y][ghost.x]
+    }
+    else{
+      ghost.tileOccupied = 0;
+    }
+    level[ghost.y][ghost.x] = ghost.symbol;    
+    
+
+  }
+
   function displayLevel(){    
     var output = '';
     
@@ -162,56 +273,26 @@ $(document).ready(function(){
     document.getElementsByClassName('score')[0].innerHTML = score.toString();
   }
 
-  function moveGhosts(){
-    for(i=0;i<ghosts.length; i++){
-      level[ghosts[i].y][ghosts[i].x] = 0;
-      if(ghosts[i].inBox){
-        if(level[9][12] == 0){
-          ghosts[i]['y'] = 9;
-          ghosts[i]['x'] = 12;
-          ghosts[i]['inBox'] = false;
-        }
-      }
-      else{
-        var vector = getVectorTo(ghosts[i]['x'], ghosts[i]['y'], PacMan['x'], PacMan['y']);
-        if(level[ghosts[i]['y']+vector[1]][ghosts[i]['x']] == 1 || level[ghosts[i]['y']+vector[1]][ghosts[i]['x']] == 0){
-          ghosts[i].y += vector[1];
-        }
-        else if(level[ghosts[i]['y']][ghosts[i]['x']+vector[0]] == 1 || level[ghosts[i]['y']][ghosts[i]['x']+vector[0]] == 0){
-          ghosts[i]['x'] += vector[0];
-        }
-        else if(level[ghosts[i]['y']][ghosts[i]['x']+vector[0]] == 1 || level[ghosts[i]['y']][ghosts[i]['x']+vector[0]] == 0){
-          ghosts[i]['x'] += vector[0];
-        }
-
-      }
-      level[ghosts[i]['y']][ghosts[i]['x']] = ghosts[i]['symbol'];
-    }
-  }
-
   function handleKeys(key_code){
     if(key_code == 119){
-      if(level[PacMan.y-1][PacMan.x] != 2 && level[PacMan.y-1][PacMan.x] != '-'){
+      if(spaceIsClear(PacMan.x, PacMan.y-1)){
         PacMan.dir = 'north';
       }
     }
     else if(key_code == 97){
-      if(level[PacMan.y][PacMan.x-1] != 2 && level[PacMan.y][PacMan.x+1] != '-'){
+      if(spaceIsClear(PacMan.x-1, PacMan.y)){
         PacMan.dir = 'west';
       }
     }
     else if(key_code == 115){
-      if(level[PacMan.y+1][PacMan.x] != 2 && level[PacMan.y+1][PacMan.x] != '-'){
+      if(spaceIsClear(PacMan.x, PacMan.y+1)){
         PacMan.dir = 'south';
       }
     }
     else if(key_code == 100){
-      if(level[PacMan.y][PacMan.x+1] != 2 && level[PacMan.y][PacMan.x-1] != '-'){
+      if(spaceIsClear(PacMan.x+1, PacMan.y)){
         PacMan.dir = 'east';
       }
-    }
-    else if(key_code == 13){
-      newGame();
     }
   }
 
@@ -222,7 +303,7 @@ $(document).ready(function(){
     var y = PacMan.y;
 
     if(direction == 'north'){
-      if(level[PacMan.y-1][PacMan.x] != 2 && level[PacMan.y-1][PacMan.x] != '-'){
+      if(spaceIsClear(PacMan.x, PacMan.y-1)){
         if(level[PacMan.y-1][PacMan.x] == 1){
           score += 10;
         }
@@ -234,7 +315,7 @@ $(document).ready(function(){
       }
     }
     else if(direction == 'east'){
-      if(level[PacMan.y][PacMan.x+1] != 2 && level[PacMan.y][PacMan.x+1] != '-'){
+      if(spaceIsClear(PacMan.x+1, PacMan.y)){
         if(level[PacMan.y][PacMan.x+1] == 1){
           score += 10;
         }
@@ -243,11 +324,15 @@ $(document).ready(function(){
         }
 
         PacMan.x += 1;
+        
+        if(PacMan.x == 23 && PacMan.y == 11){
+          PacMan.x = 1;
+        }
         moved = true;
       }
     }
     else if(direction == 'south'){
-      if(level[PacMan.y+1][PacMan.x] != 2 && level[PacMan.y+1][PacMan.x] != '-'){
+      if(spaceIsClear(PacMan.x, PacMan.y+1)){
         if(level[PacMan.y+1][PacMan.x] == 1){
           score += 10;
         }
@@ -260,12 +345,16 @@ $(document).ready(function(){
       }
     }
     else if(direction == 'west'){
-      if(level[PacMan.y][PacMan.x-1] != 2 && level[PacMan.y][PacMan.x-1] != '-'){
+      if(spaceIsClear(PacMan.x-1, PacMan.y)){
         if(level[PacMan.y][PacMan.x-1] == 1){
           score += 10;
         }
         else if(level[PacMan.y][PacMan.x-1] == 3){
           score +=50;
+        }
+
+        if(PacMan.x == 1 && PacMan.y == 11){
+          PacMan.x = 24;
         }
 
         PacMan.x -= 1;
@@ -276,11 +365,11 @@ $(document).ready(function(){
     if(moved){
       level[PacMan['y']][PacMan['x']] = 'p_' + PacMan['dir'];
       level[y][x] = 0;
-      moveGhosts()
-      displayLevel();
     }
-
-
+    for(i = 0; i < ghosts.length; i++){
+      moveGhost(ghosts[i])
+    }
+    displayLevel();
   }
 
   function update(){
@@ -294,12 +383,14 @@ $(document).ready(function(){
     })
 
     update();
+    turns ++;
+    console.log(turns);
   }
   
   function newGame(){
     var game = true;
 
-    setInterval(mainLoop,500)
+    setInterval(mainLoop,10)
 
   }
   
@@ -314,14 +405,13 @@ $(document).ready(function(){
   var ghostsInBox = 4;
   var score = 0;
   var game = false;
+  var turns = 0;
 
   level[PacMan['y']][PacMan['x']] = 'p_west';
   placeGhosts(level);
   displayLevel();
-
- 
   
-  setInterval(mainLoop, 500);
+  setInterval(mainLoop, 100);
   
 
 });
