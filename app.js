@@ -23,7 +23,7 @@ $(document).ready(function(){
       [2,2,2,2,2,1,2,2,0,2,2,2,2],
       [2,1,1,1,1,1,1,1,1,1,1,1,2],
       [2,1,2,2,2,1,2,2,2,2,2,1,2],
-      [2,1,1,2,2,1,1,1,1,1,1,1,1],
+      [2,3,1,2,2,1,1,1,1,1,1,1,1],
       [2,2,1,2,2,1,2,2,1,2,2,2,2],
       [2,1,1,1,1,1,2,2,1,1,1,1,2],
       [2,1,2,2,2,2,2,2,2,2,2,1,2],
@@ -52,8 +52,6 @@ $(document).ready(function(){
       level[11][11+i] = ghosts[i];
     }
 
-    level[13][12] = 'p';
-
   }
   function displayLevel(){    
     var output = '';
@@ -74,8 +72,17 @@ $(document).ready(function(){
         else if(level[j][k] == 0){
           output +="\n\t<div class='empty'></div>";
         }
-        else if(level[j][k] == 'p'){
-          output +="\n\t<div class='empty pacman'></div>";
+        else if(level[j][k] == 'p_north'){
+          output +="\n\t<div class='pacman north'></div>";
+        }
+        else if(level[j][k] == 'p_east'){
+          output +="\n\t<div class='pacman east'></div>";
+        }
+        else if(level[j][k] == 'p_south'){
+          output +="\n\t<div class='pacman south'></div>";
+        }
+        else if(level[j][k] == 'p_west'){
+          output +="\n\t<div class='pacman west'></div>";
         }
         else if(level[j][k] == 'g_o'){
           output +="\n\t<div class='empty orange_ghost'></div>";
@@ -102,9 +109,54 @@ $(document).ready(function(){
   }
 
   function handleKeys(key_code){
+    var moved = false;
+    var x = PacMan['x'];
+    var y = PacMan['y'];
+    var direction = PacMan['dir']
+
     if(key_code == 13){
       document.getElementsByClassName('start_text').hide()
-      
+    }
+    else if(key_code == 119){
+       if(level[y-1][x] != 2){
+        PacMan['y'] -= 1;
+        PacMan['dir'] = 'north';
+        moved = true;
+      }
+    }
+    else if(key_code == 97){
+      if(level[y][x-1] != 2){
+        PacMan['x'] -= 1;
+        PacMan['dir'] = 'west';
+        moved = true;
+        if(PacMan['x'] == 0){
+          PacMan['x'] = 24;
+        }
+      }
+    }
+    else if(key_code == 115){
+      if(level[y+1][x] != 2 && level[y+1][x] != '-'){
+        PacMan['y'] += 1;
+        PacMan['dir'] = 'south';
+        moved = true;
+      }
+    }
+    else if(key_code == 100){
+      if(level[y][x+1] != 2){
+        PacMan['x'] += 1;
+        PacMan['dir'] = 'east';
+        moved = true;
+        if(PacMan['x'] == 25){
+          PacMan['x'] = 1;
+        }
+
+      }
+    }
+
+    if(moved){
+      level[PacMan['y']][PacMan['x']] = 'p_' + PacMan['dir'];
+      level[y][x] = 0;
+      displayLevel();
     }
   }
   
@@ -114,6 +166,14 @@ $(document).ready(function(){
     
   })
   var level = createLevel();
+
+  var PacMan = {
+    x: 12,
+    y: 13,
+    dir: 'west',
+  }
+
+  level[PacMan['y']][PacMan['x']] = 'p_west';
   placeGhosts(level);
   displayLevel();
 

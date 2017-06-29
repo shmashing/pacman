@@ -47,10 +47,25 @@ body{
 
 }
 .pacman{
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin: -2px;
     background: url('pacman.gif');
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
+}
+.north{
+    transform: rotate(-90deg);
+}
+.east{
+    transform: rotate(0deg);
+}
+.south{
+    transform: rotate(90deg);
+}
+.west{
     transform: rotate(180deg);
 }
 .orange_ghost{
@@ -80,15 +95,20 @@ body{
 h1 {
     color: red;
     position: absolute;
-    top: 350px;
+    bottom: 50px;
     left: 135px;
 }
 .score_box {
     color: white;
     position: absolute;
-    right: 500px;
+    right: 350px;
     top: 150px;
 }
 h4 {
     margin-top: 40px;
+    display: inline-block;
+}
+.lives{
+    width: 20px;
+    height: 20px;
 }
