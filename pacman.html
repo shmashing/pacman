@@ -6,22 +6,12 @@
   <link rel="stylesheet" type="text/css" href="style.css">
   
   <script src= 'http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
-  <script src= 'app.js'></script>
-  <script>
-    $(document).ready(function(){
-
-      $(document).on('keypress', function(e){
-        if(e.keyCode == 13){
-          $('.start_text').hide();
-        }
-      })
-    });
-  </script>
 </head>
 
 <body>
   <h1 class='start_text'>PRESS ENTER TO START</h1>
   <div id='level'></div>
+  <script src= 'app.js'></script>
   <div class='score_box'>
     <div>
       <h4>Score: </h4>

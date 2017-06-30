@@ -97,28 +97,28 @@ $(document).ready(function(){
     for(i=0;i<quadrant3.length;i++){
       level.push(quadrant3[i]);
     }
-   
+
     return(level)
   }
   function placeGhosts(level){
-    var color = ['blue', 'orange', 'pink', 'red'];
 
     function ghost(name, x, y, state, symbol) {
       this.name = name
       this.x = x;
       this.y = y;
+      this.dir = [0,0];
       this.state = state;
       this.symbol = symbol;
       this.tileOccupied = '';
     
     }
 
-    var blue_ghost =   new ghost('blue', 12, 11, 'in box', 'g_b');
+    //var blue_ghost =   new ghost('blue', 12, 11, 'in box', 'g_b');
     var red_ghost =    new ghost('red', 11, 11, 'in box', 'g_r');
-    var orange_ghost = new ghost('orange', 14, 11, 'in box', 'g_o');
-    var pink_ghost =   new ghost('pink', 13, 11, 'in box', 'g_p');
+    //var orange_ghost = new ghost('orange', 14, 11, 'in box', 'g_o');
+    //var pink_ghost =   new ghost('pink', 13, 11, 'in box', 'g_p');
 
-    ghosts = [red_ghost, blue_ghost, pink_ghost, orange_ghost];
+    ghosts = [red_ghost];
 
     for(i=0; i<ghosts.length; i++){
       level[ghosts[i].y][ghosts[i].x] = ghosts[i].symbol;
@@ -132,79 +132,75 @@ $(document).ready(function(){
     level[ghost.y][ghost.x] = 0;
     ghost.hasMoved = false;
 
-    if(turns >= 20){
-      ghost.state = 'chase';
-    }
-
     if(ghost.state == 'in box'){
+   
       if(level[9][12] == 0){
         ghost.x = 12;
         ghost.y = 9;
         ghost.state = 'scatter'
         ghost.tileOccupied = 0;
+
+        if(Math.round(Math.random()) == 1){
+          ghost.dir = [-1, 0];
+        }
+        else{
+          ghost.dir = [1, 0];
+        }
       }
     }
 
-    else{
-      if(ghost.state == 'scatter'){
-        var hasMoved = false;
-        while(!hasMoved){
-          var dir = Math.round(Math.random());
-          var x = 0;
-          var y = 0;
-          if(dir == 1){
-            dir = Math.round(Math.random());
-            if(dir == 1){
-              x = 1;
-            }
-            else{
-              x = -1;
-            }
-          }
-          else{
-           dir = Math.round(Math.random());
-            if(dir == 1){
-              y = 1;
-            }
-            else{
-              y = -1;
-            }
-          }
-        
-          if(spaceIsClear(ghost.x + x, ghost.y + y)){
-            ghost.x += x;
-            ghost.y += y;
+    if(ghost.state == 'scatter'){
+      var options = []
 
-            if(ghost.x == 0 && ghost.y == 9){
-              ghost.x = 24;
-            }
-            if(ghost.x == 24 && ghost.y == 9){
-              ghost.x = 1;
-            }
-
-            hasMoved = true;
-          }
-        }
+      if(spaceIsClear(ghost.x + 1, ghost.y)){
+        options.push([1,0]);
       }
-      else if(ghost.state == 'chase'){
-
-        var vector = getVectorTo(ghost.x, ghost.y, PacMan.x, PacMan.y);
-
-        if(spaceIsClear(ghost.x+vector[0], ghost.y, true)){
-          ghost.x += vector[0];
-        }
-        else if(spaceIsClear(ghost.x, ghost.y+vector[1], true)){
-          ghost.y += vector[1];
-        }
-        else if(spaceIsClear(ghost.x-vector[0], ghost.y, true)){
-          ghost.x -= vector[0];
-        }
-        else if(spaceIsClear(ghost.x, ghost.y-vector[1], true)){
-          ghost.y -= vector[1];
-        }
+      if(spaceIsClear(ghost.x - 1, ghost.y)){
+        options.push([-1,0]);
+      }
+      if(spaceIsClear(ghost.x, ghost.y + 1)){
+        options.push([0,1]);
+      }
+      if(spaceIsClear(ghost.x, ghost.y - 1)){
+        options.push([0,-1]);
       }
 
+      for(i=0; i<options.length;i++){
+        if(options[i][0] == 0){
+          if(options[i][1] == ghost.dir[1]*-1){
+            options.splice(i,1)
+          }
+        }
+        else if(options[i][1]==0){
+          if(options[i][0] == ghost.dir[0]*-1){
+            options.splice(i,1)
+          }
+        } 
+      }
+
+      if(options.length >= 2){
+        var new_dir = options[Math.round(Math.random()*(options.length-1))]
+        if((new_dir[0] != ghost.dir[0]*(-1)) && (new_dir[1] != ghost.dir[1]*(-1))){
+          ghost.dir = new_dir;
+        }
+      }
+      else if(options.length == 1){
+        ghost.dir = options[0];
+      }
+
+      if(spaceIsClear(ghost.x+ghost.dir[0], ghost.y+ghost.dir[1])){
+        ghost.x += ghost.dir[0];
+        ghost.y += ghost.dir[1];
+
+        if((ghost.x == 0) && (ghost.y == 11)){
+          ghost.x = 25;
+        }
+        else if((ghost.x == 25) && (ghost.y == 11)){
+          ghost.x = 0;
+        }
+      }
     }
+
     level[old_y][old_x] = ghost.tileOccupied
     if(spaceIsClear(ghost.x, ghost.y)){
       ghost.tileOccupied = level[ghost.y][ghost.x]
@@ -263,6 +259,9 @@ $(document).ready(function(){
         else if(level[j][k] == '-'){
           output +="\n\t<div class='brick gate'></div>";
         }
+        else if(level[j][k] == 'c'){
+          output +="\n\t<div class='cherry'></div>";
+        }
 
       }
       output += "</div>";
@@ -276,22 +275,30 @@ $(document).ready(function(){
   function handleKeys(key_code){
     if(key_code == 119){
       if(spaceIsClear(PacMan.x, PacMan.y-1)){
-        PacMan.dir = 'north';
+        if(PacMan.dir != 'south'){
+          PacMan.dir = 'north';
+        }
       }
     }
     else if(key_code == 97){
       if(spaceIsClear(PacMan.x-1, PacMan.y)){
-        PacMan.dir = 'west';
+        if(PacMan.dir != 'east'){
+          PacMan.dir = 'west';
+        }
       }
     }
     else if(key_code == 115){
       if(spaceIsClear(PacMan.x, PacMan.y+1)){
-        PacMan.dir = 'south';
+        if(PacMan.dir != 'north'){
+          PacMan.dir = 'south';
+        }
       }
     }
     else if(key_code == 100){
       if(spaceIsClear(PacMan.x+1, PacMan.y)){
-        PacMan.dir = 'east';
+        if(PacMan.dir != 'west'){
+          PacMan.dir = 'east';
+        }
       }
     }
   }
@@ -384,7 +391,7 @@ $(document).ready(function(){
 
     update();
     turns ++;
-    console.log(turns);
+
   }
   
   function newGame(){
@@ -411,7 +418,7 @@ $(document).ready(function(){
   placeGhosts(level);
   displayLevel();
   
-  setInterval(mainLoop, 100);
+  setInterval(mainLoop, 150);
   
 
 });
