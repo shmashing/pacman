@@ -113,12 +113,12 @@ $(document).ready(function(){
     
     }
 
-    //var blue_ghost =   new ghost('blue', 12, 11, 'in box', 'g_b');
+    var blue_ghost =   new ghost('blue', 12, 11, 'in box', 'g_b');
     var red_ghost =    new ghost('red', 11, 11, 'in box', 'g_r');
-    //var orange_ghost = new ghost('orange', 14, 11, 'in box', 'g_o');
-    //var pink_ghost =   new ghost('pink', 13, 11, 'in box', 'g_p');
+    var orange_ghost = new ghost('orange', 14, 11, 'in box', 'g_o');
+    var pink_ghost =   new ghost('pink', 13, 11, 'in box', 'g_p');
 
-    ghosts = [red_ghost];
+    ghosts = [red_ghost, blue_ghost,pink_ghost, orange_ghost	];
 
     for(i=0; i<ghosts.length; i++){
       level[ghosts[i].y][ghosts[i].x] = ghosts[i].symbol;
@@ -152,16 +152,16 @@ $(document).ready(function(){
     if(ghost.state == 'scatter'){
       var options = []
 
-      if(spaceIsClear(ghost.x + 1, ghost.y)){
+      if(spaceIsClear(ghost.x + 1, ghost.y, true)){
         options.push([1,0]);
       }
-      if(spaceIsClear(ghost.x - 1, ghost.y)){
+      if(spaceIsClear(ghost.x - 1, ghost.y, true)){
         options.push([-1,0]);
       }
-      if(spaceIsClear(ghost.x, ghost.y + 1)){
+      if(spaceIsClear(ghost.x, ghost.y + 1, true)){
         options.push([0,1]);
       }
-      if(spaceIsClear(ghost.x, ghost.y - 1)){
+      if(spaceIsClear(ghost.x, ghost.y - 1,true)){
         options.push([0,-1]);
       }
 
@@ -188,7 +188,7 @@ $(document).ready(function(){
         ghost.dir = options[0];
       }
 
-      if(spaceIsClear(ghost.x+ghost.dir[0], ghost.y+ghost.dir[1])){
+      if(spaceIsClear(ghost.x+ghost.dir[0], ghost.y+ghost.dir[1], true)){
         ghost.x += ghost.dir[0];
         ghost.y += ghost.dir[1];
 
@@ -373,9 +373,12 @@ $(document).ready(function(){
       level[PacMan['y']][PacMan['x']] = 'p_' + PacMan['dir'];
       level[y][x] = 0;
     }
-    for(i = 0; i < ghosts.length; i++){
-      moveGhost(ghosts[i])
+
+    for(z=0; z<ghosts.length; z++){
+      moveGhost(ghosts[z]);
     }
+
+
     displayLevel();
   }
 
