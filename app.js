@@ -198,6 +198,10 @@ $(document).ready(function(){
         else if((ghost.x == 25) && (ghost.y == 11)){
           ghost.x = 0;
         }
+
+        // if(ghost.x == PacMan.x && ghost.y == PacMan.y){
+        //   GameOver();
+        // }
       }
     }
 
