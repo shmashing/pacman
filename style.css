@@ -56,6 +56,16 @@ body{
     background-position: center;
     background-size: cover;
 }
+.dead_pacman{
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin: -2px;
+    background: url('death2.gif');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
 .north{
     transform: rotate(-90deg);
 }
